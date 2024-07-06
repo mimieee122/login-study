@@ -1,118 +1,282 @@
-import Image from "next/image";
-import { Inter } from "next/font/google";
+import { useForm, SubmitHandler, SubmitErrorHandler } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 
-const inter = Inter({ subsets: ["latin"] });
+// zod = 검사해주는 수단
+// schema 객체로 폼 필드의 규칙을 정의
+const schema = z.object({
+    email: z
+        .string()
+        .email({ message: '⚠️ 유효한 이메일 주소를 입력해 주세요.' })
+        .min(1, { message: '⚠️ 하나 이상의 글자를 입력해 주세요.' })
+        .max(50, { message: '⚠️ 글자 수 초과' }),
+    name: z.string().min(1, { message: '⚠️ 하나 이상의 글자를 입력해주세요.' }),
+    password: z
+        .string()
+        .min(1, { message: '⚠️ 하나 이상의 글자를 입력해주세요.' }),
+    check: z.string().min(1, { message: '⚠️ 비밀번호를 확인해 주세요.' }),
+    age: z.preprocess(
+        Number,
+        z
+            .number()
+            .min(10, { message: '⚠️ 10살 미만은 가입할 수 없어요.' })
+            .max(60, { message: '⚠️ 60세 이상은 가입할 수 없어요.' })
+    ),
+    address: z
+        .string()
+        .min(1, { message: '⚠️ 하나 이상의 글자를 입력해주세요.' }),
+    phone: z
+        .number()
+        .min(1, { message: '⚠️ 하나 이상의 숫자를 입력해주세요.' }),
+    path: z.string(),
+})
 
-export default function Home() {
-  return (
-    <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
-    >
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/pages/index.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
+type SchemaType = z.infer<typeof schema>
+
+export default function HookFormPage() {
+    const {
+        register, // 폼 필드를 등록하는 함수
+        handleSubmit, // 폼 제출을 처리하는 함수
+        watch,
+        formState: { errors }, // 폼의 상태를 나타내는 객체
+    } = useForm<SchemaType>({
+        resolver: zodResolver(schema),
+    })
+
+    // const handleSuccess = (data: SchemaType) => {
+    //     console.log(data);
+    //   };
+
+    const handleSuccess: SubmitHandler<SchemaType> = (data) => {
+        alert('회원가입이 완료되었습니다.')
+    }
+
+    const handleFail: SubmitErrorHandler<SchemaType> = (errors) => {
+        console.log(errors)
+    }
+
+    return (
+        <form
+            id="form"
+            onSubmit={handleSubmit(handleSuccess, handleFail)}
+            className="flex flex-col  items-center gap-6"
+        >
+            <div className="relative z-0 flex  flex-row justify-center items-center gap-5 text-2xl ">
+                <div
+                    className="z=0 w-[350px] h-[600px] rounded-3xl bg-white bg-opacity-40 
+                border-8  border-purple-700 gap-2 flex flex-col  "
+                >
+                    <div
+                        className="z-0 w-full h-[350px] rounded-t-2xl bg-center bg-cover bg-no-repeat"
+                        style={{
+                            backgroundImage:
+                                "url('https://i.pinimg.com/564x/33/98/6c/33986ccfe5aeabc1efd9f24a90ec9b74.jpg')",
+                        }}
+                    ></div>
+                    <div
+                        className="absolute z-2 w-[400px] h-[350px] bg-no-repeat  bg-center bg-contain mr-40 mt-5 "
+                        style={{
+                            backgroundImage:
+                                "url('https://github.com/mimieee122/mslogo/blob/main/%EB%B3%B4%EB%9D%BC%EC%97%AC%EC%9E%90.png?raw=true')",
+                        }}
+                    ></div>
+                    <label
+                        htmlFor="age"
+                        className="flex flex-row items-center h-12 m-2"
+                    >
+                        <div className="bg-purple-600 rounded-md w-10 text-center">
+                            ❔
+                        </div>
+                        <input
+                            id="age"
+                            placeholder="age"
+                            type="number"
+                            {...register('age')}
+                            className="m-4 w-full h-35  bg-purple-300 bg-opacity-50 "
+                        />
+                    </label>
+                    {errors.age && (
+                        <p className="error-message">{errors.age.message}</p>
+                    )}
+
+                    <label
+                        htmlFor="address"
+                        className="flex flex-row items-center h-12 m-2"
+                    >
+                        <div className=" bg-purple-600 rounded-md w-10 text-center">
+                            ❔
+                        </div>
+
+                        <input
+                            id="address"
+                            placeholder="address"
+                            {...register('address')}
+                            className="m-4 w-full h-35  bg-purple-300 bg-opacity-50 "
+                        />
+                    </label>
+                    {errors.address && (
+                        <p className="error-message">
+                            {errors.address.message}
+                        </p>
+                    )}
+                    <label
+                        htmlFor="phone"
+                        className="flex flex-row items-center h-12 m-2"
+                    >
+                        <div className="bg-purple-600 rounded-md w-10 text-center">
+                            ❔
+                        </div>
+
+                        <input
+                            id="phone"
+                            placeholder="phone"
+                            {...register('phone')}
+                            className="m-4 w-full h-35  bg-purple-300 bg-opacity-50 "
+                        />
+                    </label>
+                    {errors.phone && (
+                        <p className="error-message">{errors.phone.message}</p>
+                    )}
+                    <div className="w-full h-10 rounded-b-md bg-purple-700  flex flex-row justify-between">
+                        <div>◀️</div>
+                        <div>✉️</div>
+                    </div>
+                </div>
+
+                <div
+                    className="z=0 w-[350px] h-[600px] rounded-3xl bg-white bg-opacity-40 
+             border-8  border-purple-700 gap-2 flex flex-col  "
+                >
+                    <div
+                        className="w-full h-[350px] rounded-t-2xl bg-center bg-cover bg-no-repeat flex flex-col items-center justify-center"
+                        style={{
+                            backgroundImage:
+                                "url('https://i.pinimg.com/564x/e6/27/ac/e627ac9dbda722a8676142a86e78d425.jpg')",
+                        }}
+                    >
+                        <div
+                            style={{
+                                backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                            }}
+                            className=" relative  w-[300px] h-[300px] rounded-md bg-white  text-wrap font-extrabold text-3xl flex flex-col justify-end items-end"
+                        >
+                            <div
+                                className="absolute z-2 w-[300px] h-[300px] bg-contain bg-no-repeat bg-left"
+                                style={{
+                                    backgroundImage:
+                                        "url('https://github.com/mimieee122/mslogo/blob/main/%ED%8D%BC%EC%97%89.png?raw=true')",
+                                }}
+                            ></div>
+                            <div className="flex flex-col gap-5 items-end text-purple-700">
+                                <p className="hi">HI</p>
+                                <p className="hi">SIGN IN</p>
+                            </div>
+                        </div>
+                    </div>
+                    <label
+                        htmlFor="password"
+                        className="flex flex-row items-center h-12 m-2"
+                    >
+                        <div className="bg-purple-600 rounded-md w-10 text-center">
+                            🔐
+                        </div>
+                        <input
+                            id="password"
+                            type="password"
+                            placeholder="password"
+                            {...register('password')}
+                            className="m-4 w-full h-35  bg-purple-300 bg-opacity-50 "
+                        />
+                    </label>
+                    {errors.password?.message && (
+                        <p className="error-message">
+                            {errors.password.message}
+                        </p>
+                    )}
+                    <label
+                        htmlFor="check"
+                        className="flex flex-row items-center h-12 m-2"
+                    >
+                        <div className="bg-purple-600 rounded-md w-10 text-center">
+                            🔐
+                        </div>
+                        <input
+                            id="check"
+                            placeholder="Confirm Password"
+                            type="password"
+                            {...register('check', {
+                                required: '⚠️ 비밀번호를 확인해 주세요.',
+                                validate: (value) =>
+                                    value === watch('password') ||
+                                    '⚠️ 비밀번호가 같지 않습니다.',
+                            })}
+                            className="m-4 w-full h-35  bg-purple-300 bg-opacity-50 "
+                        />
+                    </label>
+                    {errors.check?.message && (
+                        <p className="error-message">{errors.check.message}</p>
+                    )}
+                    <div className="mt-14 w-full h-10 rounded-b-md bg-purple-700 flex flex-row justify-between">
+                        <div>◀️</div>
+                        <div>✉️</div>
+                    </div>
+                </div>
+                <div
+                    className="z=0 w-[350px] h-[600px] rounded-3xl bg-white bg-opacity-40 
+                 border-8  border-purple-700 gap-2 flex flex-col  "
+                >
+                    <div
+                        className="w-full h-[350px] rounded-t-2xl bg-center bg-cover bg-no-repeat"
+                        style={{
+                            backgroundImage:
+                                "url('https://i.pinimg.com/564x/06/2d/b0/062db00fdc354b1f793373bc7e31752e.jpg')",
+                        }}
+                    ></div>
+                    <label
+                        htmlFor="email"
+                        className="flex flex-row items-center h-12 m-2"
+                    >
+                        <div className="bg-purple-600 rounded-md w-10 text-center">
+                            📬
+                        </div>
+                        <input
+                            id="email"
+                            placeholder="email"
+                            type="email"
+                            {...register('email')}
+                            className="m-4 w-full h-35  bg-purple-300 bg-opacity-50 "
+                        />
+                    </label>
+                    {errors.email && (
+                        <p className="error-message">{errors.email.message}</p>
+                    )}
+                    <label
+                        htmlFor="path"
+                        className="flex flex-row items-center h-12 m-2"
+                    >
+                        <div className="bg-purple-600 rounded-md w-10 text-center">
+                            👟
+                        </div>
+                        <select
+                            id="path"
+                            {...register('path')}
+                            className="m-4 w-full h-35  bg-purple-300 bg-opacity-50 "
+                        >
+                            <option>검색</option>
+                            <option>광고</option>
+                            <option>지인</option>
+                        </select>
+                    </label>
+                    <div className="w-full h-10 rounded-b-md bg-purple-700 mt-12 flex flex-row justify-between">
+                        <div>◀️</div>
+                        <div>✉️</div>
+                    </div>
+                </div>
+            </div>
+            <input
+                type="submit"
+                className="w-[350px] border-4 bg-purple-700 opacity-45 border-black rounded-md m-4 font-extrabold text-2xl"
             />
-          </a>
-        </div>
-      </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Discover and deploy boilerplate example Next.js&nbsp;projects.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50 text-balance`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  );
+        </form>
+    )
 }
