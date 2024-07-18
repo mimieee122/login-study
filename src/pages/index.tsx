@@ -1,6 +1,7 @@
 import { useForm, SubmitHandler, SubmitErrorHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import PasswordComponent from './password'
 
 // zod = 검사해주는 수단
 // schema 객체로 폼 필드의 규칙을 정의
@@ -25,9 +26,10 @@ const schema = z.object({
     address: z
         .string()
         .min(1, { message: '⚠️ 하나 이상의 글자를 입력해주세요.' }),
-    phone: z
-        .number()
-        .min(1, { message: '⚠️ 하나 이상의 숫자를 입력해주세요.' }),
+    phone: z.preprocess(
+        Number,
+        z.number().min(1, { message: '⚠️ 하나 이상의 숫자를 입력해주세요.' })
+    ),
     path: z.string(),
 })
 
@@ -37,7 +39,6 @@ export default function HookFormPage() {
     const {
         register, // 폼 필드를 등록하는 함수
         handleSubmit, // 폼 제출을 처리하는 함수
-        watch,
         formState: { errors }, // 폼의 상태를 나타내는 객체
     } = useForm<SchemaType>({
         resolver: zodResolver(schema),
@@ -173,50 +174,12 @@ export default function HookFormPage() {
                             </div>
                         </div>
                     </div>
-                    <label
-                        htmlFor="password"
-                        className="flex flex-row items-center h-12 m-2"
-                    >
-                        <div className="bg-purple-600 rounded-md w-10 text-center">
-                            🔐
-                        </div>
-                        <input
-                            id="password"
-                            type="password"
-                            placeholder="password"
-                            {...register('password')}
-                            className="m-4 w-full h-35  bg-purple-300 bg-opacity-50 "
-                        />
-                    </label>
-                    {errors.password?.message && (
-                        <p className="error-message">
-                            {errors.password.message}
-                        </p>
-                    )}
-                    <label
-                        htmlFor="check"
-                        className="flex flex-row items-center h-12 m-2"
-                    >
-                        <div className="bg-purple-600 rounded-md w-10 text-center">
-                            🔐
-                        </div>
-                        <input
-                            id="check"
-                            placeholder="Confirm Password"
-                            type="password"
-                            {...register('check', {
-                                required: '⚠️ 비밀번호를 확인해 주세요.',
-                                validate: (value) =>
-                                    value === watch('password') ||
-                                    '⚠️ 비밀번호가 같지 않습니다.',
-                            })}
-                            className="m-4 w-full h-35  bg-purple-300 bg-opacity-50 "
-                        />
-                    </label>
+
                     {errors.check?.message && (
                         <p className="error-message">{errors.check.message}</p>
                     )}
-                    <div className="mt-14 w-full h-10 rounded-b-md bg-purple-700 flex flex-row justify-between">
+                    <PasswordComponent />
+                    <div className="mt-16 w-full h-10 rounded-b-md bg-purple-700 flex flex-row justify-between">
                         <div>◀️</div>
                         <div>✉️</div>
                     </div>
