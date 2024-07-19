@@ -62,7 +62,7 @@ export default function HookFormPage() {
             onSubmit={handleSubmit(handleSuccess, handleFail)}
             className="flex flex-col  items-center gap-6"
         >
-            <div className="relative z-0 flex  flex-col md:flex-row justify-center items-center gap-5 text-2xl ">
+            <div className="relative mt-16 z-0 flex  flex-col md:flex-row justify-center items-center gap-5 text-2xl ">
                 <div
                     className="z=0 w-[350px] h-[600px] rounded-3xl bg-white bg-opacity-40 
                 border-8  border-purple-700 gap-2 flex flex-col  "
